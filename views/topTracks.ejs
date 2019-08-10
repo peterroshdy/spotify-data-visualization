@@ -1,0 +1,38 @@
+<% include partials/header %>
+<div class="container">
+  <div class="row text-center">
+    <div class="col-lg-12">
+      <h6 class="profile-name" style="margin-bottom: 50px">Your top favorite tracks</h6>
+
+        <div class="container">
+            
+            <% topTracks.forEach( track => { %>
+                <div class="row text-center" style="margin: 10px;padding: 10px;">
+                    <div  class="col-lg-4 col-xm-4">
+                        <a href="<%= track.uri %>">
+                        <img style="margin: 5px;" width="50px" src="<%= track.album.images[0].url %>" alt="<%= track.album.name %>"></a>
+                    </div>
+                    <div class="col-lg-4 col-xm-4">
+                            <a href="<%= track.uri %>"><span style="margin: 5px;"><%= track.name %></span></a><br>
+                        <% function millisToMinutesAndSeconds(millis) {
+                            var minutes = Math.floor(millis / 60000);
+                            var seconds = ((millis % 60000) / 1000).toFixed(0);
+                            return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+                          } %>
+                        <span><%= track.artists[0].name %> . <%= track.album.name %></span>
+                    </div>
+                    <div class="col-lg-4 col-xm-4">
+                        <span><%= millisToMinutesAndSeconds(track.duration_ms) %></span>
+                    </div>
+                </div>
+            <% }) %>
+            
+            
+            
+        </div>
+
+      
+    </div>
+  </div>
+</div>
+<% include partials/footer %>

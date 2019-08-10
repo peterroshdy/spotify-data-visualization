@@ -1,0 +1,23 @@
+<% include partials/header %>
+<div class="container">
+  <div class="row text-center">
+    <div class="col-lg-12">
+      <img class="profile-pic" src="<%= user_profile_picture %>" alt="profile-pic">
+      <h3 class="profile-name"><%= display_name %> </h3>
+      <span style="font-size: small;">ID:<%= user_id %></span><br><br><br>
+      <ul id="stats">
+        <li><span class="grey_text">FOLLOWERS</span> <span class="green_text"><%= user_followers_count %></span></li>
+        <li><span class="grey_text">FOLLOWING</span> <span class="green_text"><%= user_following_count %></span></li>
+        <li><span class="grey_text">PLAYLISTS</span> <span class="green_text"><%= user_playlists_count %></span></li>
+        <br>
+        <li><span class="grey_text">FAVOURITE TRACKS</span> <span class="green_text"><%= user_fav_tracks_count %></span></li>
+        <li><span class="grey_text">COUNTRY</span> <span class="green_text"><%= user_country %></span></li>
+        <li><span class="grey_text">SUBSCRIPTION</span> <span class="green_text"><%= user_sub %></span></li>
+        <br>
+        <br>
+        <a href="/logout"><button class="profile-btn" type="button" name="button">LOGOUT</button></a>
+      </ul>
+    </div>
+  </div>
+</div>
+<% include partials/footer %>
