@@ -336,7 +336,11 @@ ul#stats {
     }
 
     #stats {
-        font-size: 17px;
-        display: table-row;
+        padding: 0px;
+        width: 200px;
+    }
+
+    .phone_view {
+        text-align: left;
     }
 }

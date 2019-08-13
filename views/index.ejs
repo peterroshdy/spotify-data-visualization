@@ -1,6 +1,6 @@
 <% include partials/header %>
 <div class="container">
-  <div class="row text-center">
+  <div class="row text-center phone_view">
     <div class="col-lg-12">
       <img class="profile-pic" src="<%= user_profile_picture %>" alt="profile-pic">
       <h3 class="profile-name"><%= display_name %> </h3>
@@ -16,8 +16,8 @@
         <li><span class="grey_text">SUBSCRIPTION</span> <span class="green_text"><%= user_sub %></span></li>
         <br>
         <br>
-        <a href="/logout"><button class="profile-btn" type="button" name="button">LOGOUT</button></a>
       </ul>
+      <a href="/logout"><button class="profile-btn" type="button" name="button">LOGOUT</button></a>
     </div>
   </div>
 </div>
