@@ -304,8 +304,14 @@ ul#stats {
         display: none;
     }
 
+    .profile-pic {
+        width: 150px;
+        margin-top: 50px;
+        border-radius: 100%;
+    }
+
     .profile-name {
-        font-size: 69px;
+        font-size: 45px;
         font-weight: 700;
         margin: 20px 0px 0px;
     }
@@ -317,7 +323,7 @@ ul#stats {
     .profile-btn {
         border-radius: 0;
         font-weight: 100;
-        font-size: 35px;
+        font-size: 14px;
     }
 
     .app-footer {
@@ -325,9 +331,12 @@ ul#stats {
         font-family: sans-serif;
         margin-top: 150px;
         font-size: 35px;
+        text-align: center;
+
     }
 
     #stats {
-        font-size: 70px;
+        font-size: 17px;
+        display: table-row;
     }
 }
