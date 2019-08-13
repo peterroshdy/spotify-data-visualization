@@ -206,8 +206,7 @@ a.article:hover {
 
 #content {
     width: 100%;
-    padding-top: 91px;
-    min-height: 100vh;
+    padding-top: 85px;
     transition: all 0.3s;
 }
 
@@ -218,7 +217,7 @@ a.article:hover {
 }
 
 .profile-name {
-    font-size: 30px;
+    font-size: 35px;
     font-weight: 700;
     margin: 20px 0px 0px;
 }
@@ -230,7 +229,7 @@ ul#stats li {
 
 ul#stats {
     display: inline;
-    padding: 10px;
+    padding: 0px;
 }
 
 .grey_text {
@@ -324,7 +323,7 @@ ul#stats {
     }
 
     .profile-name {
-        font-size: 45px;
+        font-size: 30px;
         font-weight: 700;
         margin: 20px 0px 0px;
     }
