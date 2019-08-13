@@ -30,6 +30,10 @@ a:focus {
     transition: all 0.3s;
 }
 
+.mobile_nav {
+    display: none;
+}
+
 .navbar {
     padding: 15px 10px;
     background: #fff;
