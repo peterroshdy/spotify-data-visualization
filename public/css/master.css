@@ -295,9 +295,13 @@ ul#stats {
     MEDIAQUERIES
 ----------------------------------------------------- */
 
-@media (min-width: 300px) and (max-width: 400px) {
+@media (min-width: 300px) and (max-width: 700px) {
     .content {
         margin-bottom: 10%;
+    }
+
+    #sidebar {
+        display: none;
     }
 
     .profile-name {
