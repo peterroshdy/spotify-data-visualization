@@ -300,6 +300,10 @@ ul#stats {
         margin-bottom: 10%;
     }
 
+    #content {
+        display: none;
+    }
+
     #sidebar {
         display: none;
     }
@@ -342,5 +346,9 @@ ul#stats {
 
     .phone_view {
         text-align: left;
+    }
+
+    .profile-btn:hover {
+        cursor: pointer;
     }
 }
