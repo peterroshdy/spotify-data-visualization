@@ -357,4 +357,8 @@ ul#stats {
     .profile-btn:hover {
         cursor: pointer;
     }
+
+    .mobile_nav {
+        display: initial;
+    }
 }
