@@ -3,16 +3,20 @@
   <div class="row text-center">
     <div class="col-lg-12">
       <h6 class="profile-name" style="margin-bottom: 50px">Your top favorite artists</h6>
-        <div class="container">
-           <div class="row text-center">
-                    <% topArtists.forEach( artist => { %>
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                    <img style="border-radius: 100px" width="100px" src="<%= artist.images[0].url %>" alt="artist"><br><br>
-                    <strong><%= artist.name %></strong><br><br><br><br>
-                    </div>
-                    <% }) %>
-           </div> 
+      <ul id="stats">
+        <li><a href="/" class="white_text">☇ Go back</span></li>
+        <br>
+      </ul>
+      <div class="container">
+        <div class="row text-center">
+          <% topArtists.forEach( artist => { %>
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+            <img style="border-radius: 100px" width="100px" src="<%= artist.images[0].url %>" alt="artist"><br><br>
+            <strong><%= artist.name %></strong><br><br><br><br>
+          </div>
+          <% }) %>
         </div>
+      </div>
     </div>
   </div>
 </div>

@@ -234,6 +234,11 @@ ul#stats {
     font-weight: 100;
 }
 
+.white_text {
+    color: white;
+    font-weight: 900;
+}
+
 .green_text {
     color: rgb(29, 185, 84);
     font-weight: 900;
@@ -342,6 +347,7 @@ ul#stats {
     #stats {
         padding: 0px;
         width: 200px;
+        font-size: 13px;
     }
 
     .phone_view {
