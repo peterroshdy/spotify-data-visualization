@@ -76,12 +76,14 @@ span {
     background: #040306;
     color: #9b9b9b;
     transition: all 0.3s;
+    min-height: -webkit-fill-available;
 }
 
 #sidebar.active {
     min-width: 90px;
     max-width: 80px;
     text-align: center;
+    min-height: -webkit-fill-available;
 }
 
 #sidebar.active .sidebar-header h3,

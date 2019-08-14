@@ -3,19 +3,27 @@
   <div class="row text-center">
     <div class="col-lg-12">
       <h6 class="profile-name" style="margin-bottom: 50px">Your top favorite artists</h6>
-      <a href="/" class="white_text">☇ Go back</span>
-        <br><br>
+      <a href="/" class="white_text">☇ Go back</a>
+      <br><br>
 
-        <div class="container">
-          <div class="row text-center">
-            <% topArtists.forEach( artist => { %>
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-              <img style="border-radius: 100px" width="100px" src="<%= artist.images[0].url %>" alt="artist"><br><br>
-              <strong><%= artist.name %></strong><br><br><br><br>
-            </div>
-            <% }) %>
+      <div class="container">
+
+        <% if(topArtists != ''){ %>
+
+        <div class="row text-center">
+          <% topArtists.forEach( artist => { %>
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+            <img style="border-radius: 100px" width="100px" src="<%= artist.images[0].url %>" alt="artist"><br><br>
+            <strong><%= artist.name %></strong><br><br><br><br>
           </div>
+          <% }) %>
         </div>
+
+        <%}else{%>
+        <h3 class="text-center">You don't have any favorite artists yet</h3>
+        <%}%>
+        
+      </div>
     </div>
   </div>
 </div>

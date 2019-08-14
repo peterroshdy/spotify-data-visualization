@@ -1,13 +1,14 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const request = require('request');
-const SpotifyWebApi = require('spotify-web-api-node');
 const cookieParser = require('cookie-parser');
-const querystring = require('querystring');
 const axios = require('axios');
-const session = require('express-session')
-require('dotenv').config()
+const session = require('express-session');
+const passport = require('passport');
+const SpotifyStrategy = require('passport-spotify/lib/passport-spotify/index').Strategy;
+
+require('dotenv').config();
+
 
 //Listening PORT
 const port = process.env.PORT || 8080;
@@ -17,211 +18,215 @@ let my_client_id = process.env.CLIENT_ID;
 let clientSecret = process.env.CLIENT_SECRET;
 let redirectUri = process.env.REDIRECT_URI;
 
-const generateRandomString = function (length) {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+// global var to store access token
+global._token = '';
 
-  for (let i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
+// Passport session setup.
+//   To support persistent login sessions, Passport needs to be able to
+//   serialize users into and deserialize users out of the session. Typically,
+//   this will be as simple as storing the user ID when serializing, and finding
+//   the user by ID when deserializing. However, since this example does not
+//   have a database of user records, the complete spotify profile is serialized
+//   and deserialized.
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
 
-var spotifyApi = new SpotifyWebApi();
+passport.deserializeUser(function (obj, done) {
+  done(null, obj);
+});
+
+//   Use the SpotifyStrategy within Passport.
+//   Strategies in Passport require a `verify` function, which accept
+//   credentials (in this case, an accessToken, refreshToken, expires_in
+//   and spotify profile), and invoke a callback with a user object.
+passport.use(
+  new SpotifyStrategy({
+      clientID: my_client_id,
+      clientSecret: clientSecret,
+      callbackURL: redirectUri,
+    },
+    function (accessToken, refreshToken, expires_in, profile, done) {
+      // asynchronous verification, for effect...
+      _token = accessToken;
+      process.nextTick(function () {
+        // To keep the example simple, the user's spotify profile is returned to
+        // represent the logged-in user. In a typical application, you would want
+        // to associate the spotify account with a user record in your database,
+        // and return that user instead.
+        return done(null, profile);
+      });
+    }
+  )
+);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
-app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-  secret: 'some word',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: true
-  }
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: true
 }));
-
-var sess;
+// Initialize Passport!  Also use passport.session() middleware, to support
+// persistent login sessions (recommended).
+app.use(passport.initialize());
+app.use(passport.session());
 
 // index page
 app.get('/', function (req, res) {
-  if (!spotifyApi.getAccessToken()) {
-    res.render('login');
+  if (req.cookies['_token']) {
+    res.redirect('/account');
   } else {
-    res.redirect(`/home`);
+    res.render('login');
   }
+
+});
+
+
+// GET /auth/spotify
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request. The first step in spotify authentication will involve redirecting
+//   the user to spotify.com. After authorization, spotify will redirect the user
+//   back to this application at /auth/spotify/callback
+app.get(
+  '/auth/spotify',
+  passport.authenticate('spotify', {
+    scope: ['user-library-read user-read-private user-read-email user-read-recently-played user-top-read user-follow-read playlist-read-private playlist-read-collaborative'],
+    showDialog: true
+  }),
+  function (req, res) {
+    // The request will be redirected to spotify for authentication, so this
+    // function will not be called.
+  }
+);
+
+// GET /auth/spotify/callback
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request. If authentication fails, the user will be redirected back to the
+//   login page. Otherwise, the primary route function function will be called,
+//   which, in this example, will redirect the user to the home page.
+app.get(
+  '/callback',
+  passport.authenticate('spotify', {
+    failureRedirect: '/'
+  }),
+  function (req, res) {
+    res.cookie('_token', _token);
+    res.redirect('/account');
+  }
+);
+
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.clearCookie('_token');
+  res.redirect('/');
 });
 
 // Home page when user is auth
-app.get('/home', (req, res) => {
-  if (req.cookies['_token'] != spotifyApi.getAccessToken()) {
-    res.render('login');
-  } else {
-    // Get signed in user data
-    spotifyApi.getMe()
-      .then(function (data) {
-        var display_name = data.body.display_name;
-        var user_profile_picture = data.body.images[0].url;
-        var user_country = data.body.country;
-        var user_id = data.body.id;
-        var user_sub = data.body.product;
-        var user_followers_count = data.body.followers.total;
-        // Get signed in user followed artists
-        spotifyApi.getFollowedArtists()
-          .then(function (data) {
-            var user_following_count = data.body.artists.total;
-            // Get signed in user playlists
-            spotifyApi.getUserPlaylists()
-              .then(function (data) {
-                var user_playlists_count = data.body.total;
-                // Get signed in user tracks
-                spotifyApi.getMySavedTracks()
-                  .then(function (data) {
-                    var user_fav_tracks_count = data.body.total;
-                    res.render('index', {
-                      display_name,
-                      user_profile_picture,
-                      user_country,
-                      user_id,
-                      user_sub,
-                      user_followers_count,
-                      user_following_count,
-                      user_playlists_count,
-                      user_fav_tracks_count,
-                    });
-                  }, function (err) {
-                    console.log('Something went wrong!', err);
-                    res.redirect('/');
-                  });
+app.get('/account', ensureAuthenticated, (req, res) => {
+  var config = {
+    headers: {
+      'Authorization': "Bearer " + req.cookies['_token']
+    }
+  };
 
-              }, function (err) {
-                console.log('Something went wrong!', err);
-                res.redirect('/');
-              });
+  // Get user's 'following' count
+  axios.get(
+    'https://api.spotify.com/v1/me/following?type=artist',
+    config
+  ).then((response) => {
 
-          }, function (err) {
-            console.log('Something went wrong!', err);
-            res.redirect('/');
-          });
+    // Get user's 'following' count
+    var followingCount = response.data.artists.total;
 
-      }, function (err) {
-        console.log('Something went wrong!', err);
-        res.redirect('/');
+    axios.get(
+      'https://api.spotify.com/v1/me/tracks',
+      config
+    ).then((response) => {
+
+      // Get user's 'fav tracks' count
+      var favTracksCount = response.data.total;
+
+      //Send data to the 'index.ejs' view
+      res.render('index', {
+        user: req.user,
+        followingCount,
+        favTracksCount
       });
-  }
+
+    }).catch((error) => {
+      console.log(error);
+      res.redirect('/error');
+    });
+
+  }).catch((error) => {
+    console.log(error);
+    res.redirect('/error');
+  });
 });
 
 // Get signed in user top tracks
-app.get('/topTracks', (req, res) => {
-  // Check if there is no access token then make the user login first
-  if (spotifyApi.getAccessToken() != req.cookies['_token']) {
-    res.render('login');
-  } else {
-    var config = {
-      headers: {
-        'Authorization': "Bearer " + spotifyApi.getAccessToken()
-      }
-    };
-    axios.get(
-      'https://api.spotify.com/v1/me/top/tracks?limit=10',
-      config
-    ).then((response) => {
-      var topTracks = response.data.items;
-      res.render('topTracks', {
-        topTracks,
-      });
-    }).catch((error) => {
-      console.log(error);
-      res.redirect('/');
+app.get('/topTracks', ensureAuthenticated, (req, res) => {
+
+  var config = {
+    headers: {
+      'Authorization': "Bearer " + req.cookies['_token']
+    }
+  };
+  axios.get(
+    'https://api.spotify.com/v1/me/top/tracks?limit=10',
+    config
+  ).then((response) => {
+    var topTracks = response.data.items;
+    res.render('topTracks', {
+      topTracks,
     });
-  }
+  }).catch((error) => {
+    console.log(error);
+    res.redirect('/error');
+  });
 });
 
 // Get signed in user top artists
 app.get('/topArtists', (req, res) => {
-  // Check if there is no access token then make the user login first
-  if (spotifyApi.getAccessToken() != req.cookies['_token']) {
-    res.render('login');
-  } else {
-    var config = {
-      headers: {
-        'Authorization': "Bearer " + spotifyApi.getAccessToken()
-      }
-    };
-    axios.get(
-      'https://api.spotify.com/v1/me/top/artists?limit=10',
-      config
-    ).then((response) => {
-      var topArtists = response.data.items;
-      res.render('topArtists', {
-        topArtists,
-        'access_token': spotifyApi.getAccessToken(),
-      });
-    }).catch((error) => {
-      console.log(error);
-      res.redirect('/');
-    });
-  }
-});
 
-// callback 
-app.get('/callback', function (req, res) {
-  const code = req.query.code || null;
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    form: {
-      code: code,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-    },
+  var config = {
     headers: {
-      Authorization: `Basic ${new Buffer.from(`${my_client_id}:${clientSecret}`).toString('base64')}`,
-    },
-    json: true,
-  };
-
-  request.post(authOptions, function (error, response, body) {
-    if (!error && response.statusCode === 200) {
-      const access_token = body.access_token;
-      // const refresh_token = body.refresh_token;
-      res.cookie('_token', access_token, {
-        maxAge: 1000 * 60 * 60 * 60
-      });
-
-      spotifyApi.setClientId = my_client_id;
-      spotifyApi.setClientSecret = clientSecret;
-      spotifyApi.setRedirectURI = redirectUri;
-      spotifyApi.setAccessToken(access_token);
-      // we can also pass the token to the browser to make requests from there
-      res.redirect(`/home`);
-    } else {
-      res.redirect(`/#${querystring.stringify({ error: 'invalid_token' })}`);
+      'Authorization': "Bearer " + req.cookies['_token']
     }
+  };
+  axios.get(
+    'https://api.spotify.com/v1/me/top/artists?limit=10',
+    config
+  ).then((response) => {
+    var topArtists = response.data.items;
+    res.render('topArtists', {
+      topArtists
+    });
+  }).catch((error) => {
+    console.log(error);
+    res.redirect('/error');
   });
 });
 
-// login
-app.get('/login', function (req, res) {
 
-  // your application requests authorization
-  const scopes = 'user-library-read user-read-private user-read-email user-read-recently-played user-top-read user-follow-read playlist-read-private playlist-read-collaborative';
-
-  res.redirect('https://accounts.spotify.com/authorize' +
-    '?response_type=code' +
-    '&client_id=' + my_client_id +
-    (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-    '&redirect_uri=' + encodeURIComponent(redirectUri));
+app.get('/error', (req, res) => {
+  res.render('error');
 });
 
-// Logout
-app.get('/logout', (req, res) => {
-  spotifyApi.resetCredentials();
-  res.clearCookie("unique_user");
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  req.logout();
+  res.clearCookie('_token');
   res.redirect('/');
-});
+}
 
 app.listen(port);
 console.log('Listening on port ' + port);
